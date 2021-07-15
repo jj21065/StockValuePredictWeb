@@ -41,6 +41,9 @@ namespace StockWebAPI
             app.UseOpenApi();    // 啟動 OpenAPI 文件
             app.UseSwaggerUi3(); // 啟動 Swagger UI
 
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
             app.UseHttpsRedirection();
 
             app.UseRouting();
