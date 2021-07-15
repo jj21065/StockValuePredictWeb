@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>StockWebAPI</name>
+    </assembly>
+    <members>
+        <member name="M:StockWebAPI.Controllers.ApplicationController.GetMonthlyProfit">
+            <summary>
+            Get Monthly profit report
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:StockWebAPI.Controllers.ApplicationController.GetProfitDetail">
+            <summary>
+            get total profit detail
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.RevenueRecentMonth">
+            <summary>
+            近一月營收
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.RevenueRecentSeasonPredict">
+            <summary>
+            預估近一季營收
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.GrossMarginRecentSeason">
+            <summary>
+            近一季毛利率
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.GrossProfitPredict">
+            <summary>
+            預估毛利
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.OperatingCostRecentSeason">
+            <summary>
+            近一季營業費用
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.OperatingInterestRateBeforeTaxPredict">
+            <summary>
+            營業利率稅前預估
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.ProfitPredict">
+            <summary>
+            業外收益預估稅後 = ((營業利率稅前預估) - (業外收支))*0.8 
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.OutsideProfit">
+            <summary>
+            業外收支
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.ContinureOperatingProfit">
+            <summary>
+             繼續營業單位損益
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.EPSRecentSeason">
+            <summary>
+             近一季EPS = 近一季稅後淨利 * 近一季EPS / 繼續營業單位損益 
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.IndustryPEratio">
+            <summary>
+            產業本益比
+            </summary>
+        </member>
+        <member name="P:StockWebAPI.Models.ValuePredictModel.PredictPEratio">
+            <summary>
+            法人本益比
+            </summary>
+        </member>
+    </members>
+</doc>
