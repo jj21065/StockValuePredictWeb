@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockWebAPI.Models.GovData;
+using StockWebAPI.Models.StockApi;
 using StockWebAPI.Service;
 
 namespace StockWebAPI.Controllers
@@ -45,6 +46,15 @@ namespace StockWebAPI.Controllers
 
             resultList = Service.GetFinanceData();
 
+            return resultList;
+        }
+        [HttpPost("MonthlyRevenue")]
+        public async Task<ActionResult<List<float>>> GetMonthlyRevenue(StockApiPara para)
+        {
+            List<float> resultList = new List<float>();
+            Dictionary<int, int> d = new Dictionary<int, int>();
+            d.Add(para.Year, para.Month);
+            resultList = Service.GetStockMonthRevenue(d,para.StockId);
             return resultList;
         }
 
