@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using StockWebAPI.Common;
 using StockWebAPI.Models;
 using StockWebAPI.Models.GovData;
 using System;
@@ -21,15 +22,15 @@ namespace StockWebAPI.Service
             byte[] postData = Encoding.UTF8.GetBytes(parame);
 
             HttpWebRequest request = HttpWebRequest.Create(targetUrl) as HttpWebRequest;
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
+            request.Method = "GET";
+           // request.ContentType = "application/x-www-form-urlencoded";
             request.Timeout = 30000;
-            request.ContentLength = postData.Length;
+           // request.ContentLength = postData.Length;
             // 寫入 Post Body Message 資料流
-            using (Stream st = request.GetRequestStream())
-            {
-                st.Write(postData, 0, postData.Length);
-            }
+            //using (Stream st = request.GetRequestStream())
+            //{
+            //    st.Write(postData, 0, postData.Length);
+            //}
 
             string result = "";
             // 取得回應資料
@@ -69,7 +70,8 @@ namespace StockWebAPI.Service
                 }
             }
 
-            
+            MSSQLModule sqlModule = new MSSQLModule();
+            string error  = sqlModule.SqlCommand("");
             return incomeList;
          
         }
@@ -83,15 +85,15 @@ namespace StockWebAPI.Service
             byte[] postData = Encoding.UTF8.GetBytes(parame);
 
             HttpWebRequest request = HttpWebRequest.Create(targetUrl) as HttpWebRequest;
-            request.Method = "POST";
+            request.Method = "GET";
             request.ContentType = "application/x-www-form-urlencoded";
             request.Timeout = 30000;
-            request.ContentLength = postData.Length;
+            //request.ContentLength = postData.Length;
             // 寫入 Post Body Message 資料流
-            using (Stream st = request.GetRequestStream())
-            {
-                st.Write(postData, 0, postData.Length);
-            }
+            //using (Stream st = request.GetRequestStream())
+            //{
+            //    st.Write(postData, 0, postData.Length);
+            //}
 
             string result = "";
             // 取得回應資料
@@ -140,6 +142,41 @@ namespace StockWebAPI.Service
 
 
             return valuePredictList;
+        }
+
+        public string GetMonthlyDetail()
+        {
+        
+
+            List<ProfitDetailModel> detailList = new List<ProfitDetailModel>();
+            string targetUrl = "https://mops.twse.com.tw/mops/web/ajax_t163sb04";
+            string parame = "{\"encodeURIComponent\" = \"1 \" ,\"step \": \"1 \",\"firstin \": \"1 \",\"off \": \"1 \",\"isQuery \": \"Y \",\"TYPEK \": \"sii\",\"year\": \"107\",\"season\": \"02\"}";
+            byte[] postData = Encoding.UTF8.GetBytes(parame);
+
+            HttpWebRequest request = HttpWebRequest.Create(targetUrl) as HttpWebRequest;
+            request.Method = "GET";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.Timeout = 30000;
+            request.ContentLength = postData.Length;
+            // 寫入 Post Body Message 資料流
+            using (Stream st = request.GetRequestStream())
+            {
+                st.Write(postData, 0, postData.Length);
+            }
+
+            string result = "";
+            // 取得回應資料
+            using (HttpWebResponse response = request.GetResponse() as HttpWebResponse)
+            {
+                using (StreamReader sr = new StreamReader(response.GetResponseStream()))
+                {
+                    result = sr.ReadToEnd();
+
+                }
+            }
+
+          
+            return result;
         }
     }
 }

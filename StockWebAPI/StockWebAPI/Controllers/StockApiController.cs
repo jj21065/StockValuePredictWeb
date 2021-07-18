@@ -9,17 +9,18 @@ using StockWebAPI.Service;
 
 namespace StockWebAPI.Controllers
 {
-   
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
-    public class ApplicationController : ControllerBase
+   
+    public class StockApiController : ControllerBase
     {
         BasicFinanceService Service = new BasicFinanceService();
         /// <summary>
         /// Get Monthly profit report
         /// </summary>
         /// <returns></returns>
-        [HttpGet( Name = "MonthlyProfit")]
+        [HttpGet]
+        [Route("GetMonthlyProfit")]
         public async Task<ActionResult<List<MonthlyProfitModel>>> GetMonthlyProfit()
         {
             
@@ -35,7 +36,8 @@ namespace StockWebAPI.Controllers
         /// get total profit detail
         /// </summary>
         /// <returns></returns>
-        [HttpPost( Name = "Detail")]
+        [HttpGet]
+        [Route("GetProfitDetail")]
         public async Task<ActionResult<List<ProfitDetailModel>>> GetProfitDetail()
         {
             
@@ -45,6 +47,8 @@ namespace StockWebAPI.Controllers
 
             return resultList;
         }
+
+        
     }
 }
 
