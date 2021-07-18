@@ -2,6 +2,7 @@
 using StockWebAPI.Common;
 using StockWebAPI.Models;
 using StockWebAPI.Models.GovData;
+using StockWebAPI.Repository;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +15,7 @@ namespace StockWebAPI.Service
 {
     public class BasicFinanceService
     {
+        SqlStockFinanceData sqlControl = new SqlStockFinanceData();
         public List<MonthlyProfitModel> GetMonthlyProfitData()
         {
             List<MonthlyProfitModel> incomeList = new List<MonthlyProfitModel>();
@@ -144,6 +146,11 @@ namespace StockWebAPI.Service
             return valuePredictList;
         }
 
+        public List<float> GetStockMonthRevenue(Dictionary<int,int> yearMonth,int stockId)
+        {
+            List<float> rs = sqlControl.GetStockMonthlyRevenue(yearMonth, stockId);
+            return rs;
+        }
         public string GetMonthlyDetail()
         {
         
