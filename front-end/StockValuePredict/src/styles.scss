@@ -1,4 +1,69 @@
 /* You can add global styles to this file, and also import other style files */
+@import "scss/theme";
+@import "scss/variables";
+@import "scss/navbar/navbar_global";
+@import "scss/navbar/navbar_fixed";
+@import "scss/navbar/navbar_static";
+@import "scss/navbar/navbar_toggle";
+@import "scss/navbar/navbar_colors";
 
-/* Importing Bootstrap SCSS file. */
-@import '~bootstrap/scss/bootstrap';
+// ng-select-style
+@import "~@ng-select/ng-select/themes/default.theme";
+@import "scss/cards";
+
+// Custom tweak for amchart
+@import "scss/amchart";
+
+* {
+  font-family: "Microsoft JhengHei";
+}
+
+body {
+  background-color: #f8f9fa;
+}
+
+.balloonwrapper {
+  text-align: left;
+  padding: 5px;
+  // line-height: 1.6;
+  span {
+    display: block;
+  }
+}
+
+.legend {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 4px;
+  font-size: 4px;
+}
+
+.t1 {
+  background: rgb(103, 183, 220);
+}
+
+.t2 {
+  background: rgb(255, 148, 77);
+}
+
+.t3 {
+  background: rgb(169, 169, 169);
+}
+
+.c5 {
+  background: rgb(220, 53, 69);
+}
+
+.card-body.kpi {
+  padding: 0.25rem;
+}
+
+// .p-datatable .p-datatable-tbody > tr > td {
+//   padding: 0.75rem 0.25rem;
+// }
+
+td.table-text,
+th.table-text {
+  padding: 0.75rem 0.25rem !important;
+}

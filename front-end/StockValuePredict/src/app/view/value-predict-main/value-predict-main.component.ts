@@ -12,5 +12,7 @@ export class ValuePredictMainComponent implements OnInit {
   ];
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    console.log('run');
+  }
 }

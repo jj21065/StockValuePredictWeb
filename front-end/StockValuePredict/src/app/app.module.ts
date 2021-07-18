@@ -1,17 +1,28 @@
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClientModule } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
-import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { ValuePredictMainComponent } from './view/value-predict-main/value-predict-main.component';
+import { SharedModule } from './shared/shared.module';
 
-import { TableModule } from 'primeng/table';
+import { AppComponent } from './app.component';
+
+import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { ValuePredictMainComponent } from './view/value-predict-main/value-predict-main.component';
 
 @NgModule({
   declarations: [AppComponent, ValuePredictMainComponent],
-  imports: [BrowserModule, AppRoutingModule, NgbModule, TableModule],
-  providers: [],
+  imports: [
+    BrowserModule,
+    BrowserAnimationsModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    AppRoutingModule,
+    SharedModule,
+  ],
+  providers: [DatePipe, DecimalPipe, PercentPipe],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

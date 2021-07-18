@@ -1,0 +1,12 @@
+.balloonwrapper{
+  text-align: left;
+  padding:5px;
+  line-height: 1.6;
+  span{
+    display: block;
+  }
+}
+
+#export-div:hover .amcharts-export-menu {
+  opacity: 1;
+}

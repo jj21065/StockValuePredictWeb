@@ -1,0 +1,6 @@
+@import '../../node_modules/bootstrap/scss/mixins';
+@mixin rotate {
+  -webkit-transform: rotate(15deg);
+  -ms-transform: rotate(15deg);
+  transform: rotate(15deg);
+}
