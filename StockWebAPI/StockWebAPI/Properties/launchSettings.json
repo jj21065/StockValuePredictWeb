@@ -2,6 +2,10 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/StockWebAPI",
+      "sslPort": 0
+    },
     "iisExpress": {
       "applicationUrl": "http://localhost:9503",
       "sslPort": 44373
@@ -12,15 +16,15 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-   "launchUrl": "swagger",
+      
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "StockWebAPI": {
-      "commandName": "Project",
+      "commandName": "IIS",
       "launchBrowser": true,
-     
+      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

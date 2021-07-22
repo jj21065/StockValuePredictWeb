@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using StockWebAPI.Models.GovData;
-using StockWebAPI.Models.StockApi;
+using StockWebAPI.Models.StockApiInput;
+using StockWebAPI.Models.StockApiOutput;
 using StockWebAPI.Service;
 
 namespace StockWebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    
     [ApiController]
-   
+    [Route("api/[controller]")]
     public class StockApiController : ControllerBase
     {
         BasicFinanceService Service = new BasicFinanceService();
@@ -21,7 +22,7 @@ namespace StockWebAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("GetMonthlyProfit")]
+        [Route("/GetMonthlyProfit")]
         public async Task<ActionResult<List<MonthlyProfitModel>>> GetMonthlyProfit()
         {
             
@@ -38,7 +39,7 @@ namespace StockWebAPI.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [Route("GetProfitDetail")]
+        [Route("/GetProfitDetail")]
         public async Task<ActionResult<List<ProfitDetailModel>>> GetProfitDetail()
         {
             
@@ -48,17 +49,25 @@ namespace StockWebAPI.Controllers
 
             return resultList;
         }
-        [HttpPost("MonthlyRevenue")]
-        public async Task<ActionResult<List<float>>> GetMonthlyRevenue(StockApiPara para)
+        [HttpPost("/MonthlyRevenue")]
+        public async Task<ActionResult<List<float>>> GetMonthlyRevenue(StockApiParaModel para)
         {
             List<float> resultList = new List<float>();
-            Dictionary<int, int> d = new Dictionary<int, int>();
-            d.Add(para.Year, para.Month);
+            List<KeyValuePair<int, int>> d = new List<KeyValuePair<int, int>>();
+            d.Add(new KeyValuePair<int, int>(para.Year, para.Month));
             resultList = Service.GetStockMonthRevenue(d,para.StockId);
             return resultList;
         }
 
-        
+        [HttpPost("/PredictValue")]
+        public async Task<ActionResult<StockValuePredictModel>> GetPredictValue(StockValuePredictParaModel para)
+        {
+         
+            StockValuePredictModel response = Service.GetPredictStockValue(para);
+            return response;
+        }
+
+
     }
 }
 

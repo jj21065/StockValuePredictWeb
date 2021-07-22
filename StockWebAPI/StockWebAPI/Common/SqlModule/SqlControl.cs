@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MySql.Data.MySqlClient;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -13,6 +14,7 @@ namespace StockWebAPI.Common.SqlModule
         {
             string errorMsg = string.Empty;
             SqlConnection sqlConnection = null;
+
             try
             {
                 string tblName = "dbo.MonthRevenueTbl";
@@ -52,8 +54,8 @@ namespace StockWebAPI.Common.SqlModule
         {
             string errorMsg = string.Empty;
             SqlConnection sqlConnection = null;
-            
-            string connectString = $"Data Source = {para.DataSource}; Initial Catalog = {para.InitialCatalog}; uid={para.UserId};pwd={para.Password};";
+
+            string connectString = $"Server = {para.DataSource}; Initial Catalog = {para.InitialCatalog};Persist Security Info = False; uid={para.UserId};pwd={para.Password}; Encrypt = True; TrustServerCertificate = False; Connection Timeout = 30;";
             sqlConnection = new SqlConnection(connectString);
 
             //開啟連線
@@ -71,7 +73,7 @@ namespace StockWebAPI.Common.SqlModule
             return tt;
         }
 
-   
+    
     }
 
     public class SqlConnectionParameter

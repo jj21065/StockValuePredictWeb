@@ -29,9 +29,17 @@ namespace StockWebAPI
         {
             services.AddControllers();
 
-            services.AddOpenApiDocument(); // 註冊服務加入 OpenAPI 文件
-        }
-       
+            //services.AddOpenApiDocument(); // 註冊服務加入 OpenAPI 文件
+
+            services.AddSwaggerGen(config =>
+            {
+                config.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+                {
+                    Title = "StockApi",
+                    Version = "v1"
+                });
+            });
+       }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -40,8 +48,8 @@ namespace StockWebAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseOpenApi();    // 啟動 OpenAPI 文件
-            app.UseSwaggerUi3(); // 啟動 Swagger UI
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "FieldEngineerApi v1"));
 
             app.UseDefaultFiles();
             app.UseStaticFiles();

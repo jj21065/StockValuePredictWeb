@@ -2,6 +2,9 @@
 using StockWebAPI.Common;
 using StockWebAPI.Models;
 using StockWebAPI.Models.GovData;
+using StockWebAPI.Models.SqlModels;
+using StockWebAPI.Models.StockApiInput;
+using StockWebAPI.Models.StockApiOutput;
 using StockWebAPI.Repository;
 using System;
 using System.Collections.Generic;
@@ -15,7 +18,7 @@ namespace StockWebAPI.Service
 {
     public class BasicFinanceService
     {
-        SqlStockFinanceData sqlControl = new SqlStockFinanceData();
+        SqlStockFinanceRepo repo = new SqlStockFinanceRepo();
         public List<MonthlyProfitModel> GetMonthlyProfitData()
         {
             List<MonthlyProfitModel> incomeList = new List<MonthlyProfitModel>();
@@ -72,8 +75,7 @@ namespace StockWebAPI.Service
                 }
             }
 
-            MSSQLModule sqlModule = new MSSQLModule();
-            string error  = sqlModule.SqlCommand("");
+            
             return incomeList;
          
         }
@@ -138,17 +140,9 @@ namespace StockWebAPI.Service
             return detailList;
         }
 
-        public List<ValuePredictModel> GetValuePredictData()
+        public List<float> GetStockMonthRevenue(List<KeyValuePair<int, int>> yearMonth,int stockId)
         {
-            List<ValuePredictModel> valuePredictList = new List<ValuePredictModel>();
-
-
-            return valuePredictList;
-        }
-
-        public List<float> GetStockMonthRevenue(Dictionary<int,int> yearMonth,int stockId)
-        {
-            List<float> rs = sqlControl.GetStockMonthlyRevenue(yearMonth, stockId);
+            List<float> rs = repo.GetStockMonthlyRevenue(yearMonth, stockId);
             return rs;
         }
         public string GetMonthlyDetail()
@@ -184,6 +178,105 @@ namespace StockWebAPI.Service
 
           
             return result;
+        }
+
+        public StockValuePredictModel GetPredictStockValue(StockValuePredictParaModel paraModel)
+        {
+            try
+            {
+                StockValuePredictModel responseModel = new StockValuePredictModel();
+                
+                StockApiParaModel inputModel = new StockApiParaModel()
+                {
+                    StockId = paraModel.CompanyId,
+                    Year = paraModel.year,
+                    Month = paraModel.Month,
+                    Season = paraModel.Season
+                };
+                //repo.GetStockSeasonDetail(inputModel);
+                List<KeyValuePair<int, int>> yearMonths = new List<KeyValuePair<int, int>> ();
+                yearMonths.Add(new KeyValuePair<int,int>(paraModel.year,paraModel.Month));
+                yearMonths.Add(new KeyValuePair<int, int>(((paraModel.Month-1>0)?paraModel.year:paraModel.year-1), ((paraModel.Month-1)<0)?12:paraModel.Month-1));
+                yearMonths.Add(new KeyValuePair<int, int>(((paraModel.Month - 2 >0) ? paraModel.year: paraModel.year - 2), ((paraModel.Month - 2) < 0) ? 11 : paraModel.Month - 2));
+
+                List<float> revenueMonths = repo.GetStockMonthlyRevenue(yearMonths, paraModel.CompanyId);
+
+                StockFinanceSeasonDetailModel detailModel = repo.GetStockSeasonDetail(inputModel);
+
+                if (revenueMonths.Count > 0)
+                {
+                    float seasonRevenue = revenueMonths.Sum();
+                    double marginProfit = (detailModel.Revenue - detailModel.Cost) / detailModel.Revenue;
+                    double predictMargin = seasonRevenue * marginProfit;
+                    double predictSeasonProfitAfterTax = (predictMargin - detailModel.OperatingFee + detailModel.NonOperatingProfit) * 0.8;
+
+                    //EPS 
+                    double predictEPS = predictSeasonProfitAfterTax * detailModel.EPS / detailModel.TotalProfitAfterTax * 4;
+                    double predictValue = paraModel.PERatio * predictEPS;
+
+                    responseModel.PredictStockValue = predictValue;
+                    responseModel.Year = inputModel.Year;
+                    responseModel.CompanyId = detailModel.CompanyId;
+                    responseModel.CompanyName = detailModel.CompanyName;
+
+                   // responseModel.CompanyName = "test";
+                    return responseModel;
+                }
+                return null;
+            }catch(Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public StockValuePredictModel GetHistoryPeRatio(StockValuePredictParaModel paraModel)
+        {
+            try
+            {
+                StockValuePredictModel responseModel = new StockValuePredictModel();
+
+                StockApiParaModel inputModel = new StockApiParaModel()
+                {
+                    StockId = paraModel.CompanyId,
+                    Year = paraModel.year,
+                    Month = paraModel.Month,
+                    Season = paraModel.Season
+                };
+                //repo.GetStockSeasonDetail(inputModel);
+                List<KeyValuePair<int, int>> yearMonths = new List<KeyValuePair<int, int>>();
+                yearMonths.Add(new KeyValuePair<int, int>(paraModel.year, paraModel.Month));
+                yearMonths.Add(new KeyValuePair<int, int>(((paraModel.Month - 1 > 0) ? paraModel.year : paraModel.year - 1), ((paraModel.Month - 1) < 0) ? 12 : paraModel.Month - 1));
+                yearMonths.Add(new KeyValuePair<int, int>(((paraModel.Month - 2 > 0) ? paraModel.year : paraModel.year - 2), ((paraModel.Month - 2) < 0) ? 11 : paraModel.Month - 2));
+
+                List<float> revenueMonths = repo.GetStockMonthlyRevenue(yearMonths, paraModel.CompanyId);
+
+                StockFinanceSeasonDetailModel detailModel = repo.GetStockSeasonDetail(inputModel);
+
+                if (revenueMonths.Count > 0)
+                {
+                    float seasonRevenue = revenueMonths.Sum();
+                    double marginProfit = (detailModel.Revenue - detailModel.Cost) / detailModel.Revenue;
+                    double predictMargin = seasonRevenue * marginProfit;
+                    double predictSeasonProfitAfterTax = (predictMargin - detailModel.OperatingFee + detailModel.NonOperatingProfit) * 0.8;
+
+                    //EPS 
+                    double predictEPS = predictSeasonProfitAfterTax * detailModel.EPS / detailModel.TotalProfitAfterTax * 4;
+                    double predictValue = paraModel.PERatio * predictEPS;
+
+                    responseModel.PredictStockValue = predictValue;
+                    responseModel.Year = inputModel.Year;
+                    responseModel.CompanyId = detailModel.CompanyId;
+                    responseModel.CompanyName = detailModel.CompanyName;
+
+                    // responseModel.CompanyName = "test";
+                    return responseModel;
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }
