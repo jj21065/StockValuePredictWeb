@@ -26,7 +26,7 @@ namespace StockWebAPI.Models
         /// <summary>
         /// 資料本體
         /// </summary>
-        public T Data { get; set; }
+        public T PayLoad { get; set; }
 
 
         public ApiResult() { }
@@ -40,8 +40,10 @@ namespace StockWebAPI.Models
             Code = "0000";
             Succ = true;
             DataTime = DateTime.Now;
-            Data = data;
+            PayLoad = data;
         }
+
+        
     }
     public class ApiError : ApiResult<object>
     {
