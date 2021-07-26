@@ -92,7 +92,7 @@ namespace StockWebAPI.Controllers
             historyPeRatio = historyPeRatio / dataSize;
             predictResponse.PeRatioList.HistoryPeRatio = (float)historyPeRatio;
             predictResponse.PeRatioList.IndustryPeRatio = 10;
-            predictResponse.PeRatioList.IndustryPeRatio = 15;
+            predictResponse.PeRatioList.LegalPeRatio = 15;
 
 
             if (errMsg != string.Empty)
@@ -108,7 +108,23 @@ namespace StockWebAPI.Controllers
             }   
         }
 
+        [HttpGet("/GetStockInfo")]
+        public async Task<ActionResult<ApiResult<object>>> GetStockInfo()
+        {
+            string errMsg = string.Empty;
+            var response=  Service.GetStockInfo();
+            if (errMsg != string.Empty)
+            {
+                var result = new ApiError("01", errMsg) { PayLoad = response };
 
+                return result;
+            }
+            else
+            {
+                var result = new ApiResult<object>(response);
+                return result;
+            }
+        }
     }
 }
 
