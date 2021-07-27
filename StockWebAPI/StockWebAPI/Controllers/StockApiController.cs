@@ -56,7 +56,7 @@ namespace StockWebAPI.Controllers
             List<float> resultList = new List<float>();
             List<KeyValuePair<int, int>> d = new List<KeyValuePair<int, int>>();
             d.Add(new KeyValuePair<int, int>(para.Year, para.Month));
-            resultList = Service.GetStockMonthRevenue(d,para.StockId);
+            resultList = Service.GetStockMonthRevenue(d,para.StockInfo.StockId);
             return resultList;
         }
 
@@ -67,28 +67,63 @@ namespace StockWebAPI.Controllers
             string errMsg = string.Empty;
             StockValuePredictModel predictResponse = Service.GetCompanyPredictValue(para,errMsg);
 
-            GovWebResult historyResult = Service.GetHistoryPeRatio(para);
+            object historyResult = Service.GetHistoryPeRatio(para);
 
+            if(historyResult == null)
+            {
+                errMsg = "本益比查詢問題，請確認股票編號或是更換年份月分";
+                var result = new ApiError("01", errMsg) { PayLoad = predictResponse };
+                return result;
+            }
             var dataSize = 0;
             var historyPeRatio = 0d;
-            foreach(var data in historyResult.data)
+            if (para.StockInfo.StockType.ToLower() == CompanyType.SII.ToString().ToLower())
             {
-                if(data!= null)
+                GovWebResult obj = (GovWebResult)(historyResult);
+                foreach (var data in obj.data)
                 {
-                    if(data[3]!=null)
+                    if (data != null)
                     {
-                        try
+                        if (data[3] != null)
                         {
-                            double peRatio = Convert.ToDouble(data[3].ToString());
-                            historyPeRatio += peRatio;
-                            dataSize++;
-                        }catch(Exception ex)
-                        {
-                            errMsg = ex.ToString();
+                            try
+                            {
+                                double peRatio = Convert.ToDouble(data[3].ToString());
+                                historyPeRatio += peRatio;
+                                dataSize++;
+                            }
+                            catch (Exception ex)
+                            {
+                                errMsg = ex.ToString();
+                            }
                         }
                     }
                 }
             }
+            else if(para.StockInfo.StockType.ToLower() == CompanyType.OTC.ToString().ToLower())
+            {
+                OTCWebResult obj = (OTCWebResult)(historyResult);
+                foreach (var data in obj.aaData)
+                {
+                    if (data != null)
+                    {
+                        if (data[1] != null)
+                        {
+                            try
+                            {
+                                double peRatio = Convert.ToDouble(data[1].ToString());
+                                historyPeRatio += peRatio;
+                                dataSize++;
+                            }
+                            catch (Exception ex)
+                            {
+                                errMsg = ex.ToString();
+                            }
+                        }
+                    }
+                }
+            }
+
             historyPeRatio = historyPeRatio / dataSize;
             predictResponse.PeRatioList.HistoryPeRatio = (float)historyPeRatio;
             predictResponse.PeRatioList.IndustryPeRatio = 10;
