@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using StockWebAPI.Common;
 using StockWebAPI.Models;
 using StockWebAPI.Models.GovData;
 using StockWebAPI.Models.StockApiInput;
@@ -67,65 +69,39 @@ namespace StockWebAPI.Controllers
             string errMsg = string.Empty;
             StockValuePredictModel predictResponse = Service.GetCompanyPredictValue(para,errMsg);
 
-            object historyResult = Service.GetHistoryPeRatio(para);
-
-            if(historyResult == null)
+            PeRatioModel peRatioModel = new PeRatioModel();
+            StockApiParaModel paraModel = new StockApiParaModel()
             {
-                errMsg = "本益比查詢問題，請確認股票編號或是更換年份月分";
-                var result = new ApiError("01", errMsg) { PayLoad = predictResponse };
-                return result;
-            }
-            var dataSize = 0;
-            var historyPeRatio = 0d;
-            if (para.StockInfo.StockType.ToLower() == CompanyType.SII.ToString().ToLower())
-            {
-                GovWebResult obj = (GovWebResult)(historyResult);
-                foreach (var data in obj.data)
+                StockInfo = new StockInfoModel()
                 {
-                    if (data != null)
-                    {
-                        if (data[3] != null)
-                        {
-                            try
-                            {
-                                double peRatio = Convert.ToDouble(data[3].ToString());
-                                historyPeRatio += peRatio;
-                                dataSize++;
-                            }
-                            catch (Exception ex)
-                            {
-                                errMsg = ex.ToString();
-                            }
-                        }
-                    }
+                    StockId = para.StockInfo.StockId,
+                    StockName = para.StockInfo.StockName,
+                    StockType = para.StockInfo.StockType
                 }
-            }
-            else if(para.StockInfo.StockType.ToLower() == CompanyType.OTC.ToString().ToLower())
+            };
+            for (int season = 1; season <= 4; season++)
             {
-                OTCWebResult obj = (OTCWebResult)(historyResult);
-                foreach (var data in obj.aaData)
-                {
-                    if (data != null)
-                    {
-                        if (data[1] != null)
-                        {
-                            try
-                            {
-                                double peRatio = Convert.ToDouble(data[1].ToString());
-                                historyPeRatio += peRatio;
-                                dataSize++;
-                            }
-                            catch (Exception ex)
-                            {
-                                errMsg = ex.ToString();
-                            }
-                        }
-                    }
-                }
-            }
 
-            historyPeRatio = historyPeRatio / dataSize;
-            predictResponse.PeRatioList.HistoryPeRatio = (float)historyPeRatio;
+                paraModel.Year = para.Year - 1;
+                paraModel.Month = season * 3;
+
+                object historyResult = Service.GetHistoryPeRatio(paraModel);
+
+                var historyPeRatio = CommonFunction.ReturnPeRatioMonthAVG(historyResult, paraModel, errMsg);
+
+
+                peRatioModel.HistoryPeRatio += (float)historyPeRatio;
+
+                if (historyResult == null)
+                {
+                    errMsg = "本益比查詢問題，請確認股票編號或是更換年份月分";
+                    var result = new ApiError("01", errMsg) { PayLoad = predictResponse };
+                    return result;
+                }
+                Thread.Sleep(100);
+            }
+           
+            predictResponse.PeRatioList.HistoryPeRatio = (float)peRatioModel.HistoryPeRatio/4;
             predictResponse.PeRatioList.IndustryPeRatio = 10;
             predictResponse.PeRatioList.LegalPeRatio = 15;
 
@@ -160,6 +136,68 @@ namespace StockWebAPI.Controllers
                 return result;
             }
         }
+
+        [HttpGet("/GetAutoSelectLowPeRatio")]
+        public async Task<ActionResult<ApiResult<object>>> GetAutoSelectLowPeRatio()
+        {
+            string errMsg = string.Empty;
+            var potentialStockList = Service.GetAutoPositiveEPSStock(errMsg);
+
+            List<PeRatioModel> peRatioModelList = new List<PeRatioModel>();
+            Random rnd = new Random();  //產生亂數初始值
+
+            foreach (var stock in potentialStockList)
+            {
+                PeRatioModel peRatioModel = new PeRatioModel();
+                StockApiParaModel paraModel = new StockApiParaModel()
+                {
+                    StockInfo = new StockInfoModel()
+                    {
+                        StockId = stock.StockId,
+                        StockName = stock.StockName,
+                        StockType = stock.StockType
+                    }
+                };
+                DateTime nowaday = DateTime.Now;
+                int seasonCount = 4;
+                for (int season = 1; season <= seasonCount; season++)
+                {
+                    paraModel.Year = nowaday.Year-1;
+                    paraModel.Month = season * 3;
+
+                    object historyResult = Service.GetHistoryPeRatio(paraModel);
+
+                    var historyPeRatio = CommonFunction.ReturnPeRatioMonthAVG(historyResult, paraModel, errMsg);
+                    
+                    
+                    peRatioModel.HistoryPeRatio += (float)historyPeRatio;
+
+                    var rand = rnd.Next(1, 4);
+                    var delayTime = rand * 900;
+                    Thread.Sleep(3100);
+                }
+                peRatioModel.HistoryPeRatio /= 4;
+
+                paraModel.Year = nowaday.Year;
+                paraModel.Month = nowaday.Month; 
+
+
+                object nowResult = Service.GetHistoryPeRatio(paraModel);
+                var nowPeRatio = CommonFunction.ReturnPeRatioMonthAVG(nowResult, paraModel, errMsg);
+                Thread.Sleep(3000);
+                if (nowPeRatio < peRatioModel.HistoryPeRatio)
+                {
+                    peRatioModel.CurrentPeRatio = (float)nowPeRatio;
+                    peRatioModel.StockInfo = paraModel.StockInfo;
+                    peRatioModelList.Add(peRatioModel);
+                }
+            }
+            var result = new ApiResult<object>(peRatioModelList);
+            return result;
+            
+        }
+
+        
     }
 }
 
