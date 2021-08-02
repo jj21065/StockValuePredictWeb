@@ -227,9 +227,78 @@ namespace StockWebAPI.Repository
 
             }
             return idNamePair;
+        }
 
-         
+        public List<PeRatioModel> GetAutoSelectLowPeRatioStock()
+        {
+            SqlControl sql = new SqlControl();
+            StockFinanceSeasonDetailModel financeDetail = new StockFinanceSeasonDetailModel();
+            SqlConnectionParameter para = new SqlConnectionParameter()
+            {
+                DataSource = "tcp:jakedatabase.database.windows.net,1433",
+                InitialCatalog = "StockDB", //Y1H|U6Vt#DGW5ifa
+                UserId = "Stock_Developer", //Stock_Developer
+                Password = "Y1H|U6Vt#DGW5ifa" //Y1H|U6Vt#DGW5ifa
+            };
+            List<PeRatioModel> idNamePair = new List<PeRatioModel>();
+            string today = DateTime.Today.ToString("yyyy-MM-dd");
+            string conditionString = $" Where tDate = '{today}'";
 
+            try
+            {
+                string tblName = "dbo.SeasonProfitDetailTbl";
+
+                string sqlString = @"SELECT [CompanyId]
+                                    ,[CompanyName]
+                                    ,[CompanyType]
+                                    ,[CurrentPeRatio]
+                                    ,[HistoryPeRatio]
+                                    ,[tDate]
+                                    FROM[dbo].[PeRatioAutoSelectTbl] " + conditionString;
+
+                 DataTable tb = sql.SqlSelect(sqlString, para);
+                if (tb.Rows.Count > 0)
+                {
+
+                    foreach (DataRow tr in tb.Rows)
+                    {
+                        var CompanyId = tr["CompanyId"].ToString();
+                        var CompanyName = tr["CompanyName"].ToString();
+                        var CompanyType = tr["CompanyType"].ToString();
+                        var CurrentPeRatio = Convert.ToSingle(tr["CurrentPeRatio"].ToString());
+                        var HistoryPeRatio = Convert.ToSingle(tr["HistoryPeRatio"].ToString());
+                        
+                        try
+                        {
+                            var ComanyId_int = Convert.ToInt32(CompanyId);
+                            StockInfoModel info = new StockInfoModel()
+                            {
+                                StockId = ComanyId_int,
+                                StockName = CompanyName.Trim(),
+                                StockType = CompanyType.Trim()
+
+                            };
+                            PeRatioModel model = new PeRatioModel()
+                            {
+                                StockInfo = info,
+                                CurrentPeRatio = CurrentPeRatio,
+                                HistoryPeRatio = HistoryPeRatio,
+                            };
+                            idNamePair.Add(model);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+
+            }
+            return idNamePair;
         }
       
     }

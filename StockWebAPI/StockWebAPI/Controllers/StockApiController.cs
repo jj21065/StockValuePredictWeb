@@ -141,59 +141,19 @@ namespace StockWebAPI.Controllers
         public async Task<ActionResult<ApiResult<object>>> GetAutoSelectLowPeRatio()
         {
             string errMsg = string.Empty;
-            var potentialStockList = Service.GetAutoPositiveEPSStock(errMsg);
-
-            List<PeRatioModel> peRatioModelList = new List<PeRatioModel>();
-            Random rnd = new Random();  //產生亂數初始值
-
-            foreach (var stock in potentialStockList)
+            var response = Service.GetAutoSelectLowPeRatioStock();
+            if (errMsg != string.Empty)
             {
-                PeRatioModel peRatioModel = new PeRatioModel();
-                StockApiParaModel paraModel = new StockApiParaModel()
-                {
-                    StockInfo = new StockInfoModel()
-                    {
-                        StockId = stock.StockId,
-                        StockName = stock.StockName,
-                        StockType = stock.StockType
-                    }
-                };
-                DateTime nowaday = DateTime.Now;
-                int seasonCount = 4;
-                for (int season = 1; season <= seasonCount; season++)
-                {
-                    paraModel.Year = nowaday.Year-1;
-                    paraModel.Month = season * 3;
+                var result = new ApiError("01", errMsg) { PayLoad = response };
 
-                    object historyResult = Service.GetHistoryPeRatio(paraModel);
-
-                    var historyPeRatio = CommonFunction.ReturnPeRatioMonthAVG(historyResult, paraModel, errMsg);
-                    
-                    
-                    peRatioModel.HistoryPeRatio += (float)historyPeRatio;
-
-                    var rand = rnd.Next(1, 4);
-                    var delayTime = rand * 900;
-                    Thread.Sleep(3100);
-                }
-                peRatioModel.HistoryPeRatio /= 4;
-
-                paraModel.Year = nowaday.Year;
-                paraModel.Month = nowaday.Month; 
-
-
-                object nowResult = Service.GetHistoryPeRatio(paraModel);
-                var nowPeRatio = CommonFunction.ReturnPeRatioMonthAVG(nowResult, paraModel, errMsg);
-                Thread.Sleep(3000);
-                if (nowPeRatio < peRatioModel.HistoryPeRatio)
-                {
-                    peRatioModel.CurrentPeRatio = (float)nowPeRatio;
-                    peRatioModel.StockInfo = paraModel.StockInfo;
-                    peRatioModelList.Add(peRatioModel);
-                }
+                return result;
             }
-            var result = new ApiResult<object>(peRatioModelList);
-            return result;
+            else
+            {
+                var result = new ApiResult<object>(response);
+                return result;
+            }
+    
             
         }
 

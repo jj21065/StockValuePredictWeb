@@ -19,7 +19,7 @@ namespace StockWebAPI.Service
 {
     public class BasicFinanceService
     {
-        SqlStockFinanceRepo repo = new SqlStockFinanceRepo();
+        SqlStockFinanceRepo sqlRepo = new SqlStockFinanceRepo();
         public List<MonthlyProfitModel> GetMonthlyProfitData()
         {
             List<MonthlyProfitModel> incomeList = new List<MonthlyProfitModel>();
@@ -101,7 +101,7 @@ namespace StockWebAPI.Service
 
         public List<float> GetStockMonthRevenue(List<KeyValuePair<int, int>> yearMonth,int stockId)
         {
-            List<float> rs = repo.GetStockMonthlyRevenue(yearMonth, stockId);
+            List<float> rs = sqlRepo.GetStockMonthlyRevenue(yearMonth, stockId);
             return rs;
         }
     
@@ -126,9 +126,9 @@ namespace StockWebAPI.Service
                 yearMonths.Add(new KeyValuePair<int, int>(((paraModel.Month-1>0)?paraModel.Year:paraModel.Year-1), ((paraModel.Month-1)<0)?12:paraModel.Month-1));
                 yearMonths.Add(new KeyValuePair<int, int>(((paraModel.Month - 2 >0) ? paraModel.Year: paraModel.Year - 2), ((paraModel.Month - 2) < 0) ? 11 : paraModel.Month - 2));
 
-                List<float> revenueMonths = repo.GetStockMonthlyRevenue(yearMonths, paraModel.StockInfo.StockId);
+                List<float> revenueMonths = sqlRepo.GetStockMonthlyRevenue(yearMonths, paraModel.StockInfo.StockId);
 
-                StockFinanceSeasonDetailModel detailModel = repo.GetStockSeasonDetail(inputModel);
+                StockFinanceSeasonDetailModel detailModel = sqlRepo.GetStockSeasonDetail(inputModel);
 
                 if (revenueMonths.Count > 0)
                 {
@@ -216,14 +216,20 @@ namespace StockWebAPI.Service
 
         public List<StockInfoModel> GetStockInfo()
         {
-            return repo.GetStockIdNamePair();
+            return sqlRepo.GetStockIdNamePair();
         }
 
         public List<StockInfoModel> GetAutoPositiveEPSStock(string errMsg)
         {
-            var potentialStockList = repo.GetAutoPositiveEPSStock(); //取出有潛力 EPS穩定且正的
+            var potentialStockList = sqlRepo.GetAutoPositiveEPSStock(); //取出有潛力 EPS穩定且正的
 
             return potentialStockList;
+        }
+
+        public List<PeRatioModel> GetAutoSelectLowPeRatioStock()
+        {
+            var result = sqlRepo.GetAutoSelectLowPeRatioStock();
+            return result;
         }
     }
 }
