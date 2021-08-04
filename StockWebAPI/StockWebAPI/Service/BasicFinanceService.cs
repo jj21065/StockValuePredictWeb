@@ -99,7 +99,7 @@ namespace StockWebAPI.Service
             return detailList;
         }
 
-        public List<float> GetStockMonthRevenue(List<KeyValuePair<int, int>> yearMonth,int stockId)
+        public List<float> GetStockMonthRevenue(List<KeyValuePair<int, int>> yearMonth,string stockId)
         {
             List<float> rs = sqlRepo.GetStockMonthlyRevenue(yearMonth, stockId);
             return rs;
@@ -128,7 +128,7 @@ namespace StockWebAPI.Service
 
                 List<float> revenueMonths = sqlRepo.GetStockMonthlyRevenue(yearMonths, paraModel.StockInfo.StockId);
 
-                StockFinanceSeasonDetailModel detailModel = sqlRepo.GetStockSeasonDetail(inputModel);
+                SqlFinanceSeasonDetailModel detailModel = sqlRepo.GetStockSeasonDetail(inputModel);
 
                 if (revenueMonths.Count > 0)
                 {
@@ -145,7 +145,7 @@ namespace StockWebAPI.Service
                     responseModel.StockPara.Year = inputModel.Year;
                     responseModel.StockPara.Month = inputModel.Month;
                     
-                    responseModel.StockPara.StockInfo.StockId = Convert.ToInt32(detailModel.CompanyId);
+                    responseModel.StockPara.StockInfo.StockId = detailModel.CompanyId;
                     responseModel.PredictSeasonMarginProfit = marginProfit;
                     responseModel.PredictTotalProfitAfterTax = predictSeasonProfitAfterTax;
                     responseModel.PredictYearEPS = predictEPS;
@@ -230,6 +230,24 @@ namespace StockWebAPI.Service
         {
             var result = sqlRepo.GetAutoSelectLowPeRatioStock();
             return result;
+        }
+
+        public object GetTop20TradingAmount_TWSE()
+        {
+
+            string today = DateTime.Today.ToString("yyyyMMdd");
+            string targetUrl = $"https://www.twse.com.tw/exchangeReport/MI_INDEX20?response=json&date={today}&_=1627977214277";
+
+            HttpRequestControl httpRequestControl = new HttpRequestControl();
+            var result = httpRequestControl.HttpRequestMethod(targetUrl, HttpRequestControl.Method.GET);
+            var jsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<GovWebResult>(result);
+            //Console.WriteLine(result);
+            return jsonObj;
+        }
+        public List<SqlDailyTop20TradingModel> GetTop20TradingAmount_Database()
+        {
+            List< SqlDailyTop20TradingModel> sqlModels = sqlRepo.GetTop20TradingStock_Sql();
+            return sqlModels;
         }
     }
 }

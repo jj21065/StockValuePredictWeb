@@ -13,7 +13,7 @@ namespace StockWebAPI.Repository
     public class SqlStockFinanceRepo
     {
         
-        public List<float> GetStockMonthlyRevenue(List<KeyValuePair<int, int>> yearMonths,int stockId)
+        public List<float> GetStockMonthlyRevenue(List<KeyValuePair<int, int>> yearMonths,string stockId)
         {
             List<float> monthR = new List<float>();
             SqlControl sql = new SqlControl();
@@ -60,10 +60,10 @@ namespace StockWebAPI.Repository
         
         }
 
-        public StockFinanceSeasonDetailModel GetStockSeasonDetail(StockApiParaModel InputPara)
+        public SqlFinanceSeasonDetailModel GetStockSeasonDetail(StockApiParaModel InputPara)
         {
             SqlControl sql = new SqlControl();
-            StockFinanceSeasonDetailModel financeDetail = new StockFinanceSeasonDetailModel();
+            SqlFinanceSeasonDetailModel financeDetail = new SqlFinanceSeasonDetailModel();
             SqlConnectionParameter para = new SqlConnectionParameter()
             {
                 DataSource = "tcp:jakedatabase.database.windows.net,1433",
@@ -87,7 +87,7 @@ namespace StockWebAPI.Repository
                 if(tb.Rows.Count > 0)
                 {
                     DataRow tr = tb.Rows[0];
-                    financeDetail = new StockFinanceSeasonDetailModel()
+                    financeDetail = new SqlFinanceSeasonDetailModel()
                     {
                         CompanyId = tr["CompanyId"].ToString(),
                         CompanyName = tr["CompanyName"].ToString(),
@@ -114,7 +114,7 @@ namespace StockWebAPI.Repository
         public List<StockInfoModel> GetStockIdNamePair()
         {
             SqlControl sql = new SqlControl();
-            StockFinanceSeasonDetailModel financeDetail = new StockFinanceSeasonDetailModel();
+            SqlFinanceSeasonDetailModel financeDetail = new SqlFinanceSeasonDetailModel();
             SqlConnectionParameter para = new SqlConnectionParameter()
             {
                 DataSource = "tcp:jakedatabase.database.windows.net,1433",
@@ -142,10 +142,10 @@ namespace StockWebAPI.Repository
                         var CompanyType = tr["CompanyType"].ToString();
                         try
                         {
-                            var ComanyId_int = Convert.ToInt32(CompanyId);
+                            
                             StockInfoModel model = new StockInfoModel()
                             {
-                                StockId = ComanyId_int,
+                                StockId = CompanyId,
                                 StockName = CompanyName.Trim(),
                                 StockType = CompanyType.Trim()
 
@@ -170,7 +170,7 @@ namespace StockWebAPI.Repository
         public List<StockInfoModel> GetAutoPositiveEPSStock()
         {
             SqlControl sql = new SqlControl();
-            StockFinanceSeasonDetailModel financeDetail = new StockFinanceSeasonDetailModel();
+            SqlFinanceSeasonDetailModel financeDetail = new SqlFinanceSeasonDetailModel();
             SqlConnectionParameter para = new SqlConnectionParameter()
             {
                 DataSource = "tcp:jakedatabase.database.windows.net,1433",
@@ -203,10 +203,10 @@ namespace StockWebAPI.Repository
                         var CompanyType = tr["CompanyType"].ToString();
                         try
                         {
-                            var ComanyId_int = Convert.ToInt32(CompanyId);
+                          
                             StockInfoModel model = new StockInfoModel()
                             {
-                                StockId = ComanyId_int,
+                                StockId = CompanyId,
                                 StockName = CompanyName.Trim(),
                                 StockType = CompanyType.Trim()
 
@@ -232,7 +232,7 @@ namespace StockWebAPI.Repository
         public List<PeRatioModel> GetAutoSelectLowPeRatioStock()
         {
             SqlControl sql = new SqlControl();
-            StockFinanceSeasonDetailModel financeDetail = new StockFinanceSeasonDetailModel();
+            SqlFinanceSeasonDetailModel financeDetail = new SqlFinanceSeasonDetailModel();
             SqlConnectionParameter para = new SqlConnectionParameter()
             {
                 DataSource = "tcp:jakedatabase.database.windows.net,1433",
@@ -254,7 +254,7 @@ namespace StockWebAPI.Repository
                                     ,[CurrentPeRatio]
                                     ,[HistoryPeRatio]
                                     ,[tDate]
-                                    FROM[dbo].[PeRatioAutoSelectTbl] " + conditionString;
+                                    FROM[dbo].[PeRatioAutoSelectTbl] "/* + conditionString*/;
 
                  DataTable tb = sql.SqlSelect(sqlString, para);
                 if (tb.Rows.Count > 0)
@@ -270,10 +270,10 @@ namespace StockWebAPI.Repository
                         
                         try
                         {
-                            var ComanyId_int = Convert.ToInt32(CompanyId);
+                            
                             StockInfoModel info = new StockInfoModel()
                             {
-                                StockId = ComanyId_int,
+                                StockId = CompanyId,
                                 StockName = CompanyName.Trim(),
                                 StockType = CompanyType.Trim()
 
@@ -300,6 +300,100 @@ namespace StockWebAPI.Repository
             }
             return idNamePair;
         }
-      
+
+        public List<SqlDailyTop20TradingModel> GetTop20TradingStock_Sql()
+        {
+            SqlControl sql = new SqlControl();
+            
+            SqlConnectionParameter para = new SqlConnectionParameter()
+            {
+                DataSource = "tcp:jakedatabase.database.windows.net,1433",
+                InitialCatalog = "StockDB", //Y1H|U6Vt#DGW5ifa
+                UserId = "Stock_Developer", //Stock_Developer
+                Password = "Y1H|U6Vt#DGW5ifa" //Y1H|U6Vt#DGW5ifa
+            };
+            List<SqlDailyTop20TradingModel> top20ModelList = new List<SqlDailyTop20TradingModel>();
+            string today = DateTime.Today.ToString("yyyy-MM-dd");
+            string conditionString = $" Where tDate = '{today}'";
+
+            try
+            {
+                string tblName = "dbo.SeasonProfitDetailTbl";
+
+                string sqlString = @"SELECT [CompanyId]
+                                  ,[CompanyName]
+                                  ,[TransactionShares]
+                                  ,[TransactionAmount]
+                                  ,[OpeningPrice]
+                                  ,[HighestPrice]
+                                  ,[LowestPrice]
+                                  ,[ClosingPrice]
+                                  ,[UpsDowns]
+                                  ,[PriceDifference]
+                                  ,[LastRevealBuyPrice]
+                                  ,[LastRevealSealPrice]
+                                  ,[Rank]
+                                    FROM[dbo].[DailyTop20TradingAmountTbl] "/* + conditionString*/;
+
+                DataTable tb = sql.SqlSelect(sqlString, para);
+                if (tb.Rows.Count > 0)
+                {
+
+                    foreach (DataRow tr in tb.Rows)
+                    {
+                        try
+                        {
+                            var CompanyId = tr["CompanyId"].ToString().Trim();
+                            var CompanyName = tr["CompanyName"].ToString().Trim();
+                            var TransactionShares = Convert.ToSingle(tr["TransactionShares"].ToString());
+                            var TransactionAmount = Convert.ToSingle(tr["TransactionAmount"].ToString());
+                            var OpeningPrice = Convert.ToSingle(tr["OpeningPrice"].ToString());
+                            var HighestPrice = Convert.ToSingle(tr["HighestPrice"].ToString());
+                            var LowestPrice = Convert.ToSingle(tr["LowestPrice"].ToString());
+                            var ClosingPrice = Convert.ToSingle(tr["ClosingPrice"].ToString());
+                            var PriceDifference = Convert.ToSingle(tr["PriceDifference"].ToString());
+                            var LastRevealBuyPrice = Convert.ToSingle(tr["LastRevealBuyPrice"].ToString());
+                            var LastRevealSealPrice = Convert.ToSingle(tr["LastRevealSealPrice"].ToString());
+                            var upsDowns = tr["UpsDowns"].ToString().Trim();
+                            var rank = Convert.ToInt32(tr["Rank"].ToString());
+                            StockInfoModel info = new StockInfoModel()
+                            {
+                                StockId = CompanyId,
+                                StockName = CompanyName.Trim(),
+                            };
+                            SqlDailyTop20TradingModel top20Model = new SqlDailyTop20TradingModel()
+                            {
+                                CompanyName = CompanyName,
+                                CompanyId = CompanyId,
+                                TransactionShares = TransactionShares,
+                                TransactionAmount = TransactionAmount,
+                                OpeningPrice = OpeningPrice,
+                                HighestPrice = HighestPrice,
+                                LowestPrice = LowestPrice,
+                                ClosingPrice = ClosingPrice,
+                                UpsDowns = upsDowns,
+                                PriceDifference = PriceDifference,
+                                LastRevealBuyPrice= LastRevealBuyPrice,
+                                LastRevealSealPrice = LastRevealSealPrice,
+                                Rank = rank
+                            };
+                            top20ModelList.Add(top20Model);
+                        }
+                        catch (Exception ex)
+                        {
+
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+
+            }
+            return top20ModelList;
+        }
+
+
     }
 }

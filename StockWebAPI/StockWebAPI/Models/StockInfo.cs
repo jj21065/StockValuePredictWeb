@@ -7,7 +7,7 @@ namespace StockWebAPI.Models.StockApiOutput
 {
     public class StockInfoModel
     {
-        public int StockId { get; set; }
+        public string StockId { get; set; }
         public string StockName { get; set; }
 
         public string StockType { get; set; }

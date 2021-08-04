@@ -2,7 +2,7 @@
 
 namespace StockWebAPI.Models.SqlModels
 {
-    public class StockFinanceSeasonDetailModel
+    public class SqlFinanceSeasonDetailModel
     {
         public string CompanyId { get; set; }
         public string CompanyName { get; set; }
