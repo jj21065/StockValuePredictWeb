@@ -312,15 +312,13 @@ namespace StockWebAPI.Repository
                 UserId = "Stock_Developer", //Stock_Developer
                 Password = "Y1H|U6Vt#DGW5ifa" //Y1H|U6Vt#DGW5ifa
             };
+            string todayDate = DateTime.Today.ToString("yyyy-MM-dd");
+            string conditionString = $" Where tDate = '{todayDate}'";
+          
             List<SqlDailyTop20TradingModel> top20ModelList = new List<SqlDailyTop20TradingModel>();
-            string today = DateTime.Today.ToString("yyyy-MM-dd");
-            string conditionString = $" Where tDate = '{today}'";
-
-            try
-            {
-                string tblName = "dbo.SeasonProfitDetailTbl";
-
-                string sqlString = @"SELECT [CompanyId]
+            DateTime today = DateTime.Today;
+           
+            string sqlString = @"SELECT Top(20) [CompanyId]
                                   ,[CompanyName]
                                   ,[TransactionShares]
                                   ,[TransactionAmount]
@@ -333,7 +331,12 @@ namespace StockWebAPI.Repository
                                   ,[LastRevealBuyPrice]
                                   ,[LastRevealSealPrice]
                                   ,[Rank]
-                                    FROM[dbo].[DailyTop20TradingAmountTbl] "/* + conditionString*/;
+                                    ,[tDate]
+                                    FROM[dbo].[DailyTop20TradingAmountTbl] Order by tDate desc;";
+            
+            try
+            {
+                string tblName = "dbo.SeasonProfitDetailTbl";       
 
                 DataTable tb = sql.SqlSelect(sqlString, para);
                 if (tb.Rows.Count > 0)
@@ -356,6 +359,7 @@ namespace StockWebAPI.Repository
                             var LastRevealSealPrice = Convert.ToSingle(tr["LastRevealSealPrice"].ToString());
                             var upsDowns = tr["UpsDowns"].ToString().Trim();
                             var rank = Convert.ToInt32(tr["Rank"].ToString());
+                            var tDate = tr["tDate"].ToString();
                             StockInfoModel info = new StockInfoModel()
                             {
                                 StockId = CompanyId,
@@ -373,9 +377,10 @@ namespace StockWebAPI.Repository
                                 ClosingPrice = ClosingPrice,
                                 UpsDowns = upsDowns,
                                 PriceDifference = PriceDifference,
-                                LastRevealBuyPrice= LastRevealBuyPrice,
+                                LastRevealBuyPrice = LastRevealBuyPrice,
                                 LastRevealSealPrice = LastRevealSealPrice,
-                                Rank = rank
+                                Rank = rank,
+                                tDate = tDate
                             };
                             top20ModelList.Add(top20Model);
                         }

@@ -21,5 +21,7 @@ namespace StockWebAPI.Models.SqlModels
         public float LastRevealBuyPrice { get; set; }
         public float LastRevealSealPrice { get; set; }
         public int Rank { get; set; }
+
+        public string tDate { get; set; }
     }
 }
